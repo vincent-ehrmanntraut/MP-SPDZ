@@ -1,0 +1,38 @@
+a = Array.create_from([sint(1), sint(2), sint(3)])
+b = Array.create_from([sint(3), sint(2), sint(1)])
+
+c = Matrix.create_from([
+    [sint(1), sint(2), sint(3)],
+    [sint(4), sint(5), sint(6)],
+    [sint(7), sint(8), sint(9)]
+])
+
+d = Matrix.create_from([
+    [sint(9), sint(8), sint(7)],
+    [sint(6), sint(5), sint(4)],
+    [sint(1), sint(2), sint(3)]
+])
+
+break_point()
+def hacky_array_dot_matrix(arr: Array, mat: Matrix) -> Array:
+    # Arrays sadly do not have a dot function, therefore the array is converted into a 1 times n Matrix by copying register pointers.
+    tmp = sint.Matrix(rows=1, columns=len(arr), address=arr.address)
+    result = tmp.dot(mat)
+    return sint.Array(mat.shape[1], result.address)
+
+start_timer(3)
+
+e3 = hacky_array_dot_matrix(a, c)
+f3 = hacky_array_dot_matrix(b, d)
+
+stop_timer(3)
+
+e3 = e3.reveal()
+f3 = f3.reveal()
+
+crash(e3[0] != 30)
+crash(e3[1] != 36)
+crash(e3[2] != 42)
+crash(f3[0] != 40)
+crash(f3[1] != 36)
+crash(f3[2] != 32)
