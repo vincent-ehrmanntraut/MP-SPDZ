@@ -2484,7 +2484,7 @@ class matmuls(matmul_base, base.Mergeable):
         return sum(reduce(operator.mul, self.args[i + 3:i + 6])
                    for i in range(0, len(self.args), 6))
 
-class matmulsm(matmul_base):
+class matmulsm(matmul_base, base.Mergeable):
     """ Secret matrix multiplication reading directly from memory.
 
     :param: result (sint vector in row-first order)
@@ -2501,15 +2501,32 @@ class matmulsm(matmul_base):
     :param: number of columns of second factor to use (int)
     """
     code = base.opcodes['MATMULSM']
-    arg_format = ['sw','ci','ci','int','int','int','ci','ci','ci','ci',
-                  'int','int']
+    arg_format = itertools.cycle(['sw','ci','ci','int','int','int','ci','ci','ci','ci',
+                                  'int','int'])
 
-    def __init__(self, *args, **kwargs):
+    first_factor_base_addresses: list[int] | None
+    second_factor_base_addresses: list[int] | None
+    indices_values: list[list[int]] | None
+
+    def __init__(self, *args,
+                 first_factor_base_addresses: list[int] | None = None,
+                 second_factor_base_addresses: list[int] | None = None,
+                 indices_values: list[int] | None = None,
+                 **kwargs):
         matmul_base.__init__(self, *args, **kwargs)
-        for i in range(2):
-            assert args[6 + i].size == args[3 + i]
-        for i in range(2):
-            assert args[8 + i].size == args[4 + i]
+        for matmul_index in range(len(args) // 12):
+            for i in range(2):
+                assert args[12 * matmul_index + 6 + i].size == args[12 * matmul_index + 3 + i]
+            for i in range(2):
+                assert args[12 * matmul_index + 8 + i].size == args[12 * matmul_index + 4 + i]
+
+        # These are used to reconstruct that accessed memory addresses in the allocator.
+        self.first_factor_base_addresses = first_factor_base_addresses
+        self.second_factor_base_addresses = second_factor_base_addresses
+        self.indices_values = indices_values
+
+        assert len(first_factor_base_addresses) == len(second_factor_base_addresses)
+        assert len(indices_values) == 4 * len(first_factor_base_addresses)
 
     def add_usage(self, req_node):
         super(matmulsm, self).add_usage(req_node)
