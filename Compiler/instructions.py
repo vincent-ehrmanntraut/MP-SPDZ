@@ -2494,11 +2494,11 @@ class matmulsm(matmul_base, base.Mergeable):
     :param: number of columns in first factor and rows in second factor (int)
     :param: number of columns in second factor and result (int)
     :param: rows of first factor to use (regint vector, length as number of rows in first factor)
-    :param: columns of first factor to use (regint vector, length below)
-    :param: rows of second factor to use (regint vector, length below)
-    :param: columns of second factor to use (regint vector, length below)
-    :param: number of columns of first / rows of second factor to use (int)
-    :param: number of columns of second factor to use (int)
+    :param: columns of first factor to use (regint vector, length as number of columns in the first factor)
+    :param: rows of second factor to use (regint vector, length as number of columns in the first factor)
+    :param: columns of second factor to use (regint vector, length as number of columns in the second factor)
+    :param: total number of columns in the first factor, equal to used number of columns when all columns are used (int)
+    :param: total number of columns in the second factor, equal to used number of columns when all columns are used (int)
     """
     code = base.opcodes['MATMULSM']
     arg_format = itertools.cycle(['sw','ci','ci','int','int','int','ci','ci','ci','ci',

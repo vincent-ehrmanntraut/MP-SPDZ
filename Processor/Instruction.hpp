@@ -323,8 +323,8 @@ void BaseInstruction::parse_operands(istream& s, int pos, int file_pos)
         get_vector(num_var_args, start, s);
         break;
       case MATMULSM:
-        get_ints(r, s, 3);
-        get_vector(9, start, s);
+        num_var_args = get_int(s);
+        get_vector(num_var_args, start, s);
         break;
 
       // read from file, input is opcode num_args, 

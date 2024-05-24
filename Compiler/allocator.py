@@ -598,12 +598,12 @@ class Merger:
                             second_factor_row_indices = instr.indices_values[4 * matmul_idx + 2]
                             second_factor_column_indices = instr.indices_values[4 * matmul_idx + 3]
 
-                            first_factor_row_length = instr.args[12 * matmul_idx + 4]
-                            second_factor_row_length = instr.args[12 * matmul_idx + 5]
+                            first_factor_row_length = instr.args[12 * matmul_idx + 10]
+                            second_factor_row_length = instr.args[12 * matmul_idx + 11]
 
                             for i in range(instr.args[12 * matmul_idx + 3]):
-                                for j in range(instr.args[12 * matmul_idx + 11]):
-                                    for k in range(instr.args[12 * matmul_idx + 10]):
+                                for j in range(instr.args[12 * matmul_idx + 5]):
+                                    for k in range(instr.args[12 * matmul_idx + 4]):
                                         first_factor_addr = first_base + \
                                                             first_factor_row_length * first_factor_row_indices[i] + \
                                                             first_factor_column_indices[k]
