@@ -34,51 +34,53 @@ typename T::MatrixPrep& Hemi<T>::get_matrix_prep(const array<int, 3>& dims,
 
 template<class T>
 void Hemi<T>::matmulsm(SubProcessor<T>& processor, MemoryPart<T>& source,
-        const Instruction& instruction, int a, int b)
+        const Instruction& instruction)
 {
     if (HemiOptions::singleton.plain_matmul
             or not OnlineOptions::singleton.live_prep)
     {
-        processor.matmulsm(source, instruction, a, b);
+        processor.matmulsm(source, instruction);
         return;
     }
+    throw runtime_error("MATMULSM not implmented for Hemi");
 
-    auto& dim = instruction.get_start();
-    auto& S = processor.get_S();
-    auto C = S.begin() + (instruction.get_r(0));
-    assert(C + dim[0] * dim[2] <= S.end());
-    auto Proc = processor.Proc;
-    assert(Proc);
-
-    ShareMatrix<T> A(dim[0], dim[1]), B(dim[1], dim[2]);
-
-    if (not T::real_shares(processor.P))
-    {
-        matrix_multiply(A, B, processor);
-        return;
-    }
-
-    for (int i = 0; i < dim[0]; i++)
-        for (int k = 0; k < dim[1]; k++)
-        {
-            auto kk = Proc->get_Ci().at(dim[4] + k).get();
-            auto ii = Proc->get_Ci().at(dim[3] + i).get();
-            A.entries.v.push_back(source.at(a + ii * dim[7] + kk));
-        }
-
-    for (int k = 0; k < dim[1]; k++)
-        for (int j = 0; j < dim[2]; j++)
-        {
-            auto jj = Proc->get_Ci().at(dim[6] + j).get();
-            auto ll = Proc->get_Ci().at(dim[5] + k).get();
-            B.entries.v.push_back(source.at(b + ll * dim[8] + jj));
-        }
-
-    auto res = matrix_multiply(A, B, processor);
-
-    for (int i = 0; i < dim[0]; i++)
-        for (int j = 0; j < dim[2]; j++)
-            *(C + i * dim[2] + j) = res[{i, j}];
+    // todo: Change this.
+    // auto& dim = instruction.get_start();
+    // auto& S = processor.get_S();
+    // auto C = S.begin() + (instruction.get_r(0));
+    // assert(C + dim[0] * dim[2] <= S.end());
+    // auto Proc = processor.Proc;
+    // assert(Proc);
+    //
+    // ShareMatrix<T> A(dim[0], dim[1]), B(dim[1], dim[2]);
+    //
+    // if (not T::real_shares(processor.P))
+    // {
+    //     matrix_multiply(A, B, processor);
+    //     return;
+    // }
+    //
+    // for (int i = 0; i < dim[0]; i++)
+    //     for (int k = 0; k < dim[1]; k++)
+    //     {
+    //         auto kk = Proc->get_Ci().at(dim[4] + k).get();
+    //         auto ii = Proc->get_Ci().at(dim[3] + i).get();
+    //         A.entries.v.push_back(source.at(a + ii * dim[7] + kk));
+    //     }
+    //
+    // for (int k = 0; k < dim[1]; k++)
+    //     for (int j = 0; j < dim[2]; j++)
+    //     {
+    //         auto jj = Proc->get_Ci().at(dim[6] + j).get();
+    //         auto ll = Proc->get_Ci().at(dim[5] + k).get();
+    //         B.entries.v.push_back(source.at(b + ll * dim[8] + jj));
+    //     }
+    //
+    // auto res = matrix_multiply(A, B, processor);
+    //
+    // for (int i = 0; i < dim[0]; i++)
+    //     for (int j = 0; j < dim[2]; j++)
+    //         *(C + i * dim[2] + j) = res[{i, j}];
 }
 
 template<class T>

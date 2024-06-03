@@ -2530,7 +2530,8 @@ class matmulsm(matmul_base, base.Mergeable):
 
     def add_usage(self, req_node):
         super(matmulsm, self).add_usage(req_node)
-        req_node.increment(('matmul', tuple(self.args[3:6])), 1)
+        for i in range(0, len(self.args), 12):
+            req_node.increment(('matmul', (self.args[i + 3], self.args[i + 4], self.args[i + 5])), 1)
 
 class conv2ds(base.DataInstruction, base.VarArgsInstruction, base.Mergeable):
     """ Secret 2D convolution.

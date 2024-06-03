@@ -1117,8 +1117,7 @@ inline void Instruction::execute(Processor<sint, sgf2n>& Proc) const
         Proc.Procp.matmuls(Proc.Procp.get_S(), *this);
         return;
       case MATMULSM:
-        Proc.Procp.protocol.matmulsm(Proc.Procp, Proc.machine.Mp.MS, *this,
-            Proc.read_Ci(r[1]), Proc.read_Ci(r[2]));
+        Proc.Procp.protocol.matmulsm(Proc.Procp, Proc.machine.Mp.MS, *this);
         return;
       case CONV2DS:
         Proc.Procp.protocol.conv2ds(Proc.Procp, *this);
