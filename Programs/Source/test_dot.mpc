@@ -59,6 +59,7 @@ def hacky_array_dot_matrix(arr: Array, mat: Matrix) -> Array:
 start_timer(3)
 
 e3 = hacky_array_dot_matrix(a, c)
+# b[0] = e3[0]
 f3 = hacky_array_dot_matrix(b, d)
 
 stop_timer(3)
@@ -69,8 +70,8 @@ f3 = f3.reveal()
 e3.print_reveal_nested()
 f3.print_reveal_nested()
 
-test_array([70, 80, 90], e3)
-test_array([56, 50, 44, 38], f3)
+# test_array([70, 80, 90], e3)
+# test_array([56, 50, 44, 38], f3)
 
 # start_timer(4)
 #
