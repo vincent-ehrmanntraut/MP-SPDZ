@@ -43,7 +43,11 @@ void Hemi<T>::matmulsm(SubProcessor<T>& processor, MemoryPart<T>& source,
         return;
     }
 
-
+    // Perform the matrix multiplications in sequence.
+    // They are not merged into one communication round since that would require multiple matrix_preps to
+    // merge rounds.
+    // An improvement might be to merge the communication of multiple matrices with the same dimension into one round,
+    // which is not implemented yet.
     auto Proc = processor.Proc;
     assert(Proc);
     auto& S = processor.get_S();
@@ -87,7 +91,6 @@ void Hemi<T>::matmulsm(SubProcessor<T>& processor, MemoryPart<T>& source,
                 B.entries.v.push_back(source.at(secondFactorBase + actualSecondFactorRow * secondFactorTotalNumberOfColumns + actualSecondFactorColumn));
             }
         }
-
 
         auto res = matrix_multiply(A, B, processor);
 

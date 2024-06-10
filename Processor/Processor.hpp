@@ -601,7 +601,6 @@ void SubProcessor<T>::matmuls(const vector<T>& source,
     }
 }
 
-#define MATMULSM_DEBUG 1
 
 template<class T>
 void SubProcessor<T>::matmulsm(const MemoryPart<T>& source,
@@ -692,7 +691,7 @@ void SubProcessor<T>::matmulsm_finalize_batch(vector<int>::const_iterator startM
 
         // Finish the first unfinished row in the current matrix.
         int firstRowEndJ = resultNumberOfColumns - 1;
-        if (startMatmul == endMatmul && startI == endI) // For the case that the whole batch covers only a part of a single row.
+        if (matmulArgs == endMatmul && startI == endI) // For the case that the batch covers only a part of the first row of current matrix or only part of a single row.
             firstRowEndJ = endJ;
             #ifdef MATMULSM_DEBUG
                     cout << "Batch is in single row " << endJ << endl;
