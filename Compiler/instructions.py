@@ -2533,6 +2533,10 @@ class matmulsm(matmul_base, base.Mergeable):
         for i in range(0, len(self.args), 12):
             req_node.increment(('matmul', (self.args[i + 3], self.args[i + 4], self.args[i + 5])), 1)
 
+    def get_repeat(self):
+        return sum(reduce(operator.mul, self.args[i + 3:i + 6])
+                   for i in range(0, len(self.args), 12))
+
 class conv2ds(base.DataInstruction, base.VarArgsInstruction, base.Mergeable):
     """ Secret 2D convolution.
 
