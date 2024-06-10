@@ -42,45 +42,59 @@ void Hemi<T>::matmulsm(SubProcessor<T>& processor, MemoryPart<T>& source,
         processor.matmulsm(source, instruction);
         return;
     }
-    throw runtime_error("MATMULSM not implmented for Hemi");
 
-    // todo: Change this.
-    // auto& dim = instruction.get_start();
-    // auto& S = processor.get_S();
-    // auto C = S.begin() + (instruction.get_r(0));
-    // assert(C + dim[0] * dim[2] <= S.end());
-    // auto Proc = processor.Proc;
-    // assert(Proc);
-    //
-    // ShareMatrix<T> A(dim[0], dim[1]), B(dim[1], dim[2]);
-    //
-    // if (not T::real_shares(processor.P))
-    // {
-    //     matrix_multiply(A, B, processor);
-    //     return;
-    // }
-    //
-    // for (int i = 0; i < dim[0]; i++)
-    //     for (int k = 0; k < dim[1]; k++)
-    //     {
-    //         auto kk = Proc->get_Ci().at(dim[4] + k).get();
-    //         auto ii = Proc->get_Ci().at(dim[3] + i).get();
-    //         A.entries.v.push_back(source.at(a + ii * dim[7] + kk));
-    //     }
-    //
-    // for (int k = 0; k < dim[1]; k++)
-    //     for (int j = 0; j < dim[2]; j++)
-    //     {
-    //         auto jj = Proc->get_Ci().at(dim[6] + j).get();
-    //         auto ll = Proc->get_Ci().at(dim[5] + k).get();
-    //         B.entries.v.push_back(source.at(b + ll * dim[8] + jj));
-    //     }
-    //
-    // auto res = matrix_multiply(A, B, processor);
-    //
-    // for (int i = 0; i < dim[0]; i++)
-    //     for (int j = 0; j < dim[2]; j++)
-    //         *(C + i * dim[2] + j) = res[{i, j}];
+
+    auto Proc = processor.Proc;
+    assert(Proc);
+    auto& S = processor.get_S();
+    auto& start = instruction.get_start();
+
+    for (auto matmulArgs = start.begin(); matmulArgs < start.end(); matmulArgs += 12) {
+        auto C = S.begin() + matmulArgs[0];
+        size_t firstFactorBase  = Proc->get_Ci().at(matmulArgs[1]).get();
+        size_t secondFactorBase = Proc->get_Ci().at(matmulArgs[2]).get();
+        auto resultNumberOfRows = matmulArgs[3];
+        auto usedNumberOfFirstFactorColumns = matmulArgs[4];
+        auto resultNumberOfColumns = matmulArgs[5];
+        auto firstFactorTotalNumberOfColumns = matmulArgs[10];
+        auto secondFactorTotalNumberOfColumns = matmulArgs[11];
+
+        assert(C + resultNumberOfRows * resultNumberOfColumns <= S.end());
+
+        ShareMatrix<T> A(resultNumberOfRows, usedNumberOfFirstFactorColumns), B(usedNumberOfFirstFactorColumns, resultNumberOfColumns);
+        if (not T::real_shares(processor.P))
+        {
+            matrix_multiply(A, B, processor);
+            return;
+        }
+
+        for (int i = 0; i < resultNumberOfRows; i++) {
+            auto actualFirstFactorRow = Proc->get_Ci().at(matmulArgs[6] + i).get();
+
+            for (int k = 0; k < usedNumberOfFirstFactorColumns; k++)
+            {
+                auto actualFirstFactorColumn = Proc->get_Ci().at(matmulArgs[7] + k).get();
+                A.entries.v.push_back(source.at(firstFactorBase + actualFirstFactorRow * firstFactorTotalNumberOfColumns + actualFirstFactorColumn));
+            }
+        }
+
+
+        for (int k = 0; k < usedNumberOfFirstFactorColumns; k++) {
+            auto actualSecondFactorRow = Proc->get_Ci().at(matmulArgs[8] + k).get();
+            for (int j = 0; j < resultNumberOfColumns; j++)
+            {
+                auto actualSecondFactorColumn = Proc->get_Ci().at(matmulArgs[9] + j).get();
+                B.entries.v.push_back(source.at(secondFactorBase + actualSecondFactorRow * secondFactorTotalNumberOfColumns + actualSecondFactorColumn));
+            }
+        }
+
+
+        auto res = matrix_multiply(A, B, processor);
+
+        for (int i = 0; i < resultNumberOfRows; i++)
+            for (int j = 0; j < resultNumberOfColumns; j++)
+                *(C + i * resultNumberOfColumns + j) = res[{i, j}];
+    }
 }
 
 template<class T>
