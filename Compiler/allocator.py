@@ -585,8 +585,6 @@ class Merger:
                 if options.preserve_mem_order:
                     strict_mem_access(n, last_mem_read, last_mem_write)
                 else:
-                    print(instr, last_mem_write_of)
-                    print(instr.args)
                     if instr.indices_values:
                         # Determine which values get accessed by the MATMULSM instruction and only add the according dependencies.
                         for matmul_idx in range(len(instr.first_factor_base_addresses)):
